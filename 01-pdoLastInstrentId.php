@@ -5,7 +5,6 @@
  * Date: 2018-04-17
  * Time: 14:05
  */
-
 //实例化pdo对象
 $dsn = "mysql:host=106.75.129.183;dbname=test;port=3306;charset=utf8";
 $user = 'root';
