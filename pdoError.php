@@ -18,4 +18,6 @@ $pao_statement = $pdo->prepare($sql);
 $pao_statement->execute();
 $result = $pao_statement->errorInfo();
 echo "<pre>";
+
+echo "test";
 var_dump($result);
