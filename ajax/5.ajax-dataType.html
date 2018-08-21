@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript">
+        //兼容各个浏览器的xmlHttpRequest对象
+        var xhr;
+        try{
+            //尝试执行
+            xhr = new XMLHttpRequest();
+
+        }catch (e){
+            //尝试使用IE6
+            try{
+                xhr = new ActiveXObject("Msxml2.XMLHTTP");
+            }catch(e){
+                //尝试使用IE5.5
+                try {
+                    xhr = new ActiveXObject("Microsoft.XMLHTTP");
+                }catch(e){
+                    alert('你的浏览器太破了，不值得拥有,去百度下载一个吧');
+                    location.href = "http://www.baidu.com";
+                }
+            }
+        }
+
+        //通过上面的xhr对象,和服务器进行交互
+        //参数1：GET或POST,http请求的方式
+        //参数2：服务器地址
+        //参数3：是否异步请求，true是，flase表示非异步
+        var name = "love&hate";
+        xhr.open('POST','http://www.lianxi.d/ajax/5.php',true);
+        //发送请求
+        xhr.send();
+        //如何接受数据，xhr对象是否在帮我们做事，监视一下
+        xhr.onreadystatechange = function () {
+            xhr.readyState;//获得XHR监视对象的状态：0 1 2 3 4
+            xhr.status;//服务器的状态 404 500 200
+            if (xhr.readyState == 4 && xhr.status == 200 ) {
+                //说明你请求服务器成功
+                alert(xhr.responseText);
+                console.log(xhr.responseText);
+            }
+        }
+    </script>
+</head>
+<body>
+
+</body>
+</html>
