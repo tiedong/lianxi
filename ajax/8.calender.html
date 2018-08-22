@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style type="text/css">
+        *{margin: 0;padding: 0}
+        body{font-family: Arial "微软雅黑";font-size: 14px}
+        #main{width: 300px;margin:100px auto;}
+        #main input{height: 30px;width: 297px}
+        #calendar{width:100%;border:1px solid #ccc;}
+        .title{height:30px;background: rgb(21,166,253);position: relative;line-height: 30px}
+        .title div{position: absolute;}
+        .prev{left: 10px}
+        .next{right:10px;}
+        .now{left:40%;}
+        table{width: 100%;border-collapse: collapse;}
+        table th{font-weight: normal;}
+        table td,th{border:1px solid #ccc;text-align: center;height: 25px}
+        /*定义红色的字体样式*/
+        .red{color:red;}
+        /*定义蓝色字体的样式*/
+        .blue{color:blue;}
+
+        .promotion{color:red;position: absolute;left:0;top:0;}
+    </style>
+</head>
+<body>
+<div id="main">
+    <input type="text">
+    <div id="calendar">
+
+    </div>
+</div>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript">
+    var oCalendar = document.getElementById("calendar");
+    //获取当前的年月
+    var oDate = new  Date();
+    var year = oDate.getFullYear();
+    var month = oDate.getMonth()+1;
+
+
+   //动态创建日历的代码
+    var oInput = document.getElementsByTagName("input")[0];
+    oInput.onfocus = function () {
+        createCalendar(year,month)
+    };
+    var flag = true;//门开着
+    function createCalendar(year,month) {
+        if ( flag ) {
+            //创建title部分
+            var oTitle = document.createElement('div');
+            oTitle.className = 'title';
+            oTitle.innerHTML = '<div class="prev"><span>'+(month-1 == 0?12:month-1)+'</span>月</div><div class="now"><span>'+year+'</span>年<span>'+month+'</span>月</div><div class="next"><span>'+(month+1==13?1:month+1)+'</span>月</div>';
+            //确定title的位置
+            oCalendar.appendChild(oTitle);
+
+            //创建星期部分
+            var weeks = ['日','一','二','三','四','五','六'];
+            var oTable = document.createElement('table');
+            var oThead = document.createElement('thead');
+            var oTr = document.createElement('tr');
+            for(var i=0;i<weeks.length;i++){
+                var oth = document.createElement('th');
+                oth.innerHTML = weeks[i];
+                oTr.appendChild(oth);
+            }
+            oThead.appendChild(oTr);
+            oTable.appendChild(oThead);
+            oCalendar.appendChild(oTable);
+
+            //创建日期部分
+            if(month == 1 || month==3 || month==5 || month==7 || month==8 || month==10 ||month==12){
+                var dayNum = 31;
+            }else if(month==4 || month==6 || month==9 || month==11){
+                var dayNum = 30;
+            }else if(month ==2 && isLeapYear(year)){
+                //闰年2月，有29天
+                var dayNum = 29;
+            }else{
+                //平年的2月28天
+                var dayNum = 28;
+            }
+
+
+            //确定当前月的1号，第一天是星期几？
+            oDate.setFullYear(year);
+            oDate.setMonth(month-1);	//0-11数字
+            oDate.setDate(1);
+
+            //创建日期部分：先创建5行7列的td
+            var oTbody = document.createElement('tbody');
+            for(var i=0;i<6;i++){
+                var otr = document.createElement('tr');
+
+                //每个tr里面有7列
+                for(var j=0;j<7;j++){
+                    var otd = document.createElement('td');
+                    otr.appendChild(otd);
+                }
+
+                oTbody.appendChild(otr);
+            }
+            oTable.appendChild(oTbody);
+            oCalendar.appendChild(oTable);
+
+            //再来获得这个月的1号是星期几
+            var week = oDate.getDay();
+            // alert(week);
+            var oTds = document.getElementsByTagName('td');
+            for(var i=1;i<=dayNum;i++){
+                oTds[i-1+week].innerHTML = i;   //1   tds[0]   2  tds[1]   3  tds[2]
+            }
+
+            oSpans = document.getElementsByTagName("span");
+            var prevSpan = oSpans[0].parentNode;
+            var nextSpan = oSpans[3].parentNode;
+
+            //给上一月
+            prevSpan.onclick = function () {
+                oCalendar.innerHTML = "";
+                flag = true;
+                //再重新创建,如果你当前月是一月的时候
+                if ( month == 1 ) {
+                    createCalendar(year-1,12);
+                } else {
+                    createCalendar(year,month-1);
+                }
+
+            };
+            //点击下一月
+            nextSpan.onclick = function () {
+                oCalendar.innerHTML = "";
+                flag = true;
+                if ( month == 12 ) {
+                    createCalendar(year+1,1);
+                } else {
+                    createCalendar(year,month+1);
+                }
+            };
+//日历创建完毕，就让当前的日期显示红色
+            showColor();//显示颜色
+            tdClick();//点击绑定事件
+            isEmpty();//如果最后一行显示为空，则去掉
+            getPromotion();//获得促销活动
+            flag = false;
+        }
+    }
+
+    var otds = document.getElementsByTagName("td");
+
+    //获取促销信息
+    function getPromotion() {
+        $$.request({
+            method:"GET",
+            url:"http://www.lianxi.d/ajax/8.promotion.php",
+            data:"",
+            dataType:"json",
+            success:function (result) {
+                //获取促销的年月
+                var pyear = result.year;
+                var pmonth = result.month;
+                var pday = result.day;
+
+                //拿促销的日期和日历中的年月日进行比较
+                var cyear = oSpans[1].innerText;
+                var cmonth =  oSpans[2].innerText;
+
+                //遍历促销中日期
+                for ( var i=0;i<pday.length;i++ ) {
+                    for ( var j=0 ; j<otds.length;j++ ) {
+                        if (pday[i] == otds[j].innerText && pyear == cyear && pmonth == cmonth ) {
+                            otds[j].style.position = 'relative';
+                            otds[j].innerHTML += '<span class="promotion">促</span>';
+                        }
+                    }
+                }
+            }
+        })
+    }
+    //当前年月日的今天显示红色，后安5天显示蓝色
+    function showColor() {
+        var oDate = new  Date();
+        //现在年月日
+        var year = oDate.getFullYear();
+        var month = oDate.getMonth()+1;
+        var day = oDate.getDate();
+
+        //和日历中的年、月、日进行比较
+        //遍历日历中的每一个td
+        for(var i=0;i<otds.length;i++){
+            if(day == otds[i].innerText && year==oSpans[1].innerText && month == oSpans[2].innerText){
+                //让该td字体显示红色
+                otds[i].className = 'red';
+                var oindex = i;
+            }
+        }
+        //从
+        for (var j=oindex+1;j<oindex+6;j++) {
+            otds[j].className = 'blue';
+        }
+
+    }
+
+    function tdClick() {
+        for ( var i=0;i<otds.length;i++ ) {
+            otds[i].onclick = function () {
+                if (this.className == 'red' || this.className == 'blue') {
+                    //将该日期的信息显示到输入框
+                    var day = this.innerText;
+                    day = day < 10 ? '0'+day : day;
+
+                    //年份
+                    var year = oSpans[1].innerText;
+                    var month = oSpans[2].innerText;
+                    month = month < 10 ? '0'+month : month;
+
+                    var result  = year + '-'+month+'-'+day;
+                    oInput.value = result.substring(0,10);
+//再将日历隐藏
+                    oCalendar.innerHTML = '';
+                    flag = true;
+                } else {
+                    alert("该日期不参与活动！");
+                }
+            }
+        }
+    }
+    
+    function isEmpty() {
+        if (otds[35].innerText == '') {
+            for ( var i=35;i<42;i++) {
+                otds[i].style.display = 'none';
+            }
+        }
+    }
+    //判断当前年份是否是瑞年
+    function isLeapYear(year) {
+        //闰年：世纪年能被400整除，非世纪年能被4整除的就是闰年
+        if(year % 100 ==0 && year % 400 ==0){
+            return true;
+        }else if(year % 100 != 0 && year % 4 ==0){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+</script>
+</body>
+</html>
