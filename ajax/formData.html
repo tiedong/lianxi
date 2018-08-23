@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript" src="js/common.js"></script>
+</head>
+<body>
+<form >
+    <p>用户名：<input type="text" name="user"></p>
+    <p>密&nbsp;&nbsp;码：<input type="password" name="pwd"></p>
+    <p>邮&nbsp;&nbsp;箱：<input type="text" name="email"></p>
+    <p>头&nbsp;&nbsp;像：<input type="file" name="userpic"></p>
+    <p><input type="button" value="提交" id="btn"></p>
+</form>
+<script type="text/javascript">
+    var oform = document.getElementsByTagName('form')[0];
+    var oBtn = $("btn");
+    oBtn.onclick = function () {
+        var user = document.getElementsByName("user")[0].value;
+        var pwd = document.getElementsByName("pwd")[0].value;
+        var email = document.getElementsByName("email")[0].value;
+
+       var xhr;
+       try{
+           xhr = new XMLHttpRequest();
+       }catch(e){
+           xhr = ActiveXObject("Msxml2.XMLHTTP");
+       }
+       xhr.open("POST",'http://www.lianxi.d/ajax/upload.php',true);
+       var data = new FormData(oform);
+       xhr.send(data);
+       xhr.onreadystatechange = function () {
+           if ( xhr.readyState==4 && xhr.status==200) {
+               console.log(xhr.responseText);
+           }
+       }
+    }
+</script>
+</body>
+</html>

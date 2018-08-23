@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style type="text/css">
+        *{margin: 0;padding: 0}
+        form{width: 500px;margin: 100px auto;}
+        #parent{width: 500px;height: 30px;border: 1px solid #666;position: relative;display: none;}
+        #child{width: 10%;height: 30px;background: pink;position: absolute;left: 0;top: 0;display: none;}
+    </style>
+</head>
+<body>
+<form >
+    <p>用户名：<input type="text" name="user"></p>
+    <p>密&nbsp;&nbsp;码：<input type="password" name="pwd"></p>
+    <p>邮&nbsp;&nbsp;箱：<input type="text" name="email"></p>
+    <div id="parent">
+        <div id="child"></div>
+    </div>
+    <p>头&nbsp;&nbsp;像：<input type="file" name="userpic"></p>
+    <p><input type="button" value="提交" id="btn"></p>
+</form>
+<script type="text/javascript" src="js/common.js"></script>
+<script type="text/javascript">
+    var oform = document.getElementsByTagName('form')[0];
+    var oBtn = $("btn");
+    oBtn.onclick = function () {
+        var user = document.getElementsByName("user")[0].value;
+        var pwd = document.getElementsByName("pwd")[0].value;
+        var email = document.getElementsByName("email")[0].value;
+
+       var xhr;
+       try{
+           xhr = new XMLHttpRequest();
+       }catch(e){
+           xhr = ActiveXObject("Msxml2.XMLHTTP");
+       }
+       console.log(xhr.upload);
+       xhr.upload.onprogress = function (e) {
+           var ev = e || window.event;
+           console.log(ev);
+           var scale = Math.floor(ev.loaded / ev.total*100);
+
+           //让进度条显示出来
+           $("parent").style.display = 'block';
+           $("child").style.display = 'block';
+
+           //设置进度条宽度 上传的比例
+           $("child").style.width = scale+'%';
+           $("child").innerHTML = scale+'%';
+           $("child").style.textAlign = 'center';
+
+           //如果比例上传达到100%的时候，提示上传成功并隐藏进度条
+           if ( scale == 100 ) {
+//               alert("上传成功！")
+               $("parent").style.display = 'none';
+               $("child").style.display = 'none';
+           }
+
+       };
+       xhr.open("POST",'http://www.lianxi.d/ajax/upload.php',true);
+       var data = new FormData(oform);
+       xhr.send(data);
+       xhr.onreadystatechange = function () {
+           if ( xhr.readyState==4 && xhr.status==200) {
+               console.log(xhr.responseText);
+           }
+       }
+    }
+</script>
+</body>
+</html>
