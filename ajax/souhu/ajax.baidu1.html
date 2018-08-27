@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript">
+        function callback(obj) {
+            console.log(obj);
+        }
+    </script>
+</head>
+<body>
+关键字：<input type="text">
+<script type="text/javascript">
+    var oInput = document.getElementsByTagName("input")[0];
+    oInput.onblur = function () {
+        keyword = this.value;
+        var oScript = document.createElement("script");
+        oScript.type = "text/javascript";
+        oScript.src = "https://sp0.baidu.com/5a1Fazu8AA54nxGko9WTAnF6hhy/su?wd="+keyword+"&cb=callback";
+        document.body.appendChild(oScript);
+    }
+</script>
+</body>
+</html>
